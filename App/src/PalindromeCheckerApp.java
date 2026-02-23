@@ -1,29 +1,40 @@
 public class PalindromeCheckerApp {
     public static void main(String[] args){
-        public class UseCase3PalindromeCheckerApp {
+        public class UseCase4PalindromeCheckerApp {
 
             public static void main(String[] args) {
 
+                // Original String
+                String text = "radar";
 
-                String original = "level";
+                // Convert string to character array
+                char[] characters = text.toCharArray();
 
+                // Two-pointer technique
+                int start = 0;
+                int end = characters.length - 1;
 
-                String reversed = "";
+                boolean isPalindrome = true;
 
+                while (start < end) {
 
-                for (int i = original.length() - 1; i >= 0; i--) {
-                    reversed = reversed + original.charAt(i);
+                    if (characters[start] != characters[end]) {
+                        isPalindrome = false;
+                        break;
+                    }
+
+                    start++;
+                    end--;
                 }
 
 
-                if (original.equals(reversed)) {
-                    System.out.println("The string \"" + original + "\" is a Palindrome.");
+                if (isPalindrome) {
+                    System.out.println("The string \"" + text + "\" is a Palindrome.");
                 } else {
-                    System.out.println("The string \"" + original + "\" is NOT a Palindrome.");
+                    System.out.println("The string \"" + text + "\" is NOT a Palindrome.");
                 }
             }
         }
-
 
 
 
