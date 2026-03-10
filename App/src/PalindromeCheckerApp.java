@@ -1,102 +1,94 @@
 public class PalindromeCheckerApp {
- import java.util.Scanner;
-import java.util.Stack;
-import java.util.Deque;
-import java.util.ArrayDeque;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
-    // Strategy Interface
-    interface PalindromeStrategy {
-        boolean checkPalindrome(String str);
-    }
+    public class UsernameChecker {
 
-    // Stack Strategy Implementation
-    class StackStrategy implements PalindromeStrategy {
+        // Stores taken usernames -> userId
+        private final Set<String> usernames;
 
-        public boolean checkPalindrome(String str) {
+        // Tracks how many times a username was attempted
+        private final Map<String, AtomicInteger> attemptFrequency;
 
-            Stack<Character> stack = new Stack<>();
+        public UsernameChecker() {
+            usernames = ConcurrentHashMap.newKeySet(); // thread-safe set
+            attemptFrequency = new ConcurrentHashMap<>();
+        }
 
-            for (char ch : str.toCharArray()) {
-                stack.push(ch);
-            }
+        // Add a username to the system (simulate registration)
+        public void registerUsername(String username) {
+            usernames.add(username.toLowerCase());
+        }
 
-            for (char ch : str.toCharArray()) {
-                if (ch != stack.pop()) {
-                    return false;
+        // Check if username is available
+        public boolean checkAvailability(String username) {
+            username = username.toLowerCase();
+
+            // Increment attempt count
+            attemptFrequency.putIfAbsent(username, new AtomicInteger(0));
+            attemptFrequency.get(username).incrementAndGet();
+
+            // Return availability
+            return !usernames.contains(username);
+        }
+
+        // Suggest alternative usernames if taken
+        public List<String> suggestAlternatives(String username) {
+            List<String> suggestions = new ArrayList<>();
+            String base = username.replaceAll("\\W+", ""); // remove special chars
+
+            for (int i = 1; i <= 5; i++) { // generate 5 suggestions
+                String suggestion = base + i;
+                if (!usernames.contains(suggestion.toLowerCase())) {
+                    suggestions.add(suggestion);
                 }
             }
 
-            return true;
-        }
-    }
-
-    // Deque Strategy Implementation
-    class DequeStrategy implements PalindromeStrategy {
-
-        public boolean checkPalindrome(String str) {
-
-            Deque<Character> deque = new ArrayDeque<>();
-
-            for (char ch : str.toCharArray()) {
-                deque.addLast(ch);
+            // Add a variant with dot
+            String dotVariant = base.replace("_", ".").toLowerCase();
+            if (!usernames.contains(dotVariant)) {
+                suggestions.add(dotVariant);
             }
 
-            while (deque.size() > 1) {
-                if (deque.removeFirst() != deque.removeLast()) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    }
-
-    // Context Class
-    class PalindromeChecker {
-
-        private PalindromeStrategy strategy;
-
-        public PalindromeChecker(PalindromeStrategy strategy) {
-            this.strategy = strategy;
+            return suggestions;
         }
 
-        public boolean check(String str) {
-            return strategy.checkPalindrome(str);
+        // Return the most attempted username
+        public String getMostAttempted() {
+            return attemptFrequency.entrySet()
+                    .stream()
+                    .max(Comparator.comparingInt(e -> e.getValue().get()))
+                    .map(Map.Entry::getKey)
+                    .orElse(null);
         }
-    }
 
-    // Application Class
-    public class UseCase12PalindromeCheckerApp {
+        // For demo purposes: print attempt frequency
+        public void printAttemptFrequency() {
+            attemptFrequency.forEach((k, v) -> System.out.println(k + " → " + v.get()));
+        }
 
+        // Main method to test
         public static void main(String[] args) {
+            UsernameChecker checker = new UsernameChecker();
 
-            Scanner scanner = new Scanner(System.in);
+            // Simulate existing users
+            checker.registerUsername("john_doe");
+            checker.registerUsername("admin");
+            checker.registerUsername("jane_smith");
 
-            System.out.print("Enter a string: ");
-            String input = scanner.nextLine();
+            System.out.println("Availability check:");
+            System.out.println("john_doe → " + checker.checkAvailability("john_doe")); // false
+            System.out.println("jane_smith → " + checker.checkAvailability("jane_smith")); // false
+            System.out.println("new_user → " + checker.checkAvailability("new_user")); // true
 
-            System.out.println("Choose Algorithm:");
-            System.out.println("1. Stack Strategy");
-            System.out.println("2. Deque Strategy");
+            System.out.println("\nSuggestions for 'john_doe':");
+            System.out.println(checker.suggestAlternatives("john_doe")); // ["john_doe1", "john_doe2", ...]
 
-            int choice = scanner.nextInt();
+            System.out.println("\nMost attempted username:");
+            System.out.println(checker.getMostAttempted()); // "john_doe"
 
-            PalindromeStrategy strategy;
-
-            if (choice == 1) {
-                strategy = new StackStrategy();
-            } else {
-                strategy = new DequeStrategy();
-            }
-
-            PalindromeChecker checker = new PalindromeChecker(strategy);
-
-            if (checker.check(input)) {
-                System.out.println("The string is a Palindrome.");
-            } else {
-                System.out.println("The string is NOT a Palindrome.");
-            }
-
-            scanner.close();
+            System.out.println("\nAttempt frequencies:");
+            checker.printAttemptFrequency();
         }
     }
