@@ -1,40 +1,89 @@
 public class PalindromeCheckerApp {
     public static void main(String[] args){
 import java.util.Scanner;
-import java.util.Stack;
-import java.util.Queue;
-import java.util.LinkedList;
 
-        public class UseCase6PalindromeCheckerApp {
+        class Node {
+            char data;
+            Node next;
 
+            Node(char data) {
+                this.data = data;
+                this.next = null;
+            }
+        }
+
+        public class UseCase8PalindromeCheckerApp {
+
+            // Reverse a linked list
+            public static Node reverse(Node head) {
+                Node prev = null;
+                Node current = head;
+                Node next = null;
+
+                while (current != null) {
+                    next = current.next;
+                    current.next = prev;
+                    prev = current;
+                    current = next;
+                }
+                return prev;
+            }
+
+            // Check palindrome using linked list
+            public static boolean isPalindrome(Node head) {
+                if (head == null || head.next == null)
+                    return true;
+
+                Node slow = head;
+                Node fast = head;
+
+                // Find middle using fast & slow pointer
+                while (fast != null && fast.next != null) {
+                    slow = slow.next;
+                    fast = fast.next.next;
+                }
+
+                // Reverse second half
+                Node secondHalf = reverse(slow);
+                Node firstHalf = head;
+
+                // Compare both halves
+                while (secondHalf != null) {
+                    if (firstHalf.data != secondHalf.data)
+                        return false;
+
+                    firstHalf = firstHalf.next;
+                    secondHalf = secondHalf.next;
+                }
+
+                return true;
+            }
+
+            public static void main(String[] args) {
 
                 Scanner scanner = new Scanner(System.in);
-
-                Stack<Character> stack = new Stack<>();
-                Queue<Character> queue = new LinkedList<>();
 
                 System.out.print("Enter a string: ");
                 String input = scanner.nextLine();
 
-                // Insert characters into both stack and queue
-                for (int i = 0; i < input.length(); i++) {
-                    char ch = input.charAt(i);
-                    stack.push(ch);      // LIFO
-                    queue.add(ch);       // FIFO
-                }
+                // Convert string to linked list
+                Node head = null;
+                Node tail = null;
 
-                boolean isPalindrome = true;
+                for (char ch : input.toCharArray()) {
+                    Node newNode = new Node(ch);
 
-                // Compare dequeue (queue) and pop (stack)
-                while (!stack.isEmpty() && !queue.isEmpty()) {
-                    if (stack.pop() != queue.remove()) {
-                        isPalindrome = false;
-                        break;
+                    if (head == null) {
+                        head = newNode;
+                        tail = newNode;
+                    } else {
+                        tail.next = newNode;
+                        tail = newNode;
                     }
                 }
 
-                // Print result
-                if (isPalindrome) {
+                // Check palindrome
+                if (isPalindrome(head)) {
                     System.out.println("The string is a Palindrome.");
                 } else {
                     System.out.println("The string is NOT a Palindrome.");
@@ -43,7 +92,4 @@ import java.util.LinkedList;
                 scanner.close();
             }
         }
-
-
-
 
